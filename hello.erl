@@ -15,7 +15,7 @@ pany(X)->
             end,
     Result.
 
-f()->["hassan","nasheed","nasralah"].
+f()->["Adi","Dan","Razvan"].
 
 
 

@@ -1,5 +1,5 @@
 -module(rec).
--export([makeFam/0]).
+-export([makeFam/0,fatherAndSons/1]).
 
 -record(man,{name,
              age,
@@ -11,13 +11,16 @@
 }).
 
 makeFam()->
-    #man{name="Adrian",age=33,children=[#child{name="A1",age=33,sex="Male"},#child{age=44,sex="Male"}]}.
+    #man{name="Adrian",
+         age=33,
+         children=[#child{name="Daniel",age=33,sex="Male"},
+                   #child{name="Chris" ,sex="Male"},
+                   #child{name="Anne",age=33,sex="Female"}]
+        }.
 
 
-maleChildren(#man{children=Ch})->[Elem|| Elem<-Ch,isMale(Elem)].
-    
-isMale(C#child{_,_,Y})->
-    case Y of 
-        "Male"->true;
-         _ ->false
-    end.
+fatherAndSons(Man=#man{children=Ch})->[length(Elem#child.name) || Elem<-Ch,isMale(Elem)].
+
+isMale(#child{sex="Male"})-> true;
+isMale(_)->false.
+

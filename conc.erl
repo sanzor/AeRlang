@@ -12,19 +12,22 @@ pfunc()->
 
 state(List)->
     receive
-        {FROM,cut}->FROM ! {self(),terminated};
-        {FROM,{add,X}}->
+        {FROM,done}->ok;
+        {FROM,{store,Elem}}->
             FROM ! {self(),stored},
-            state([X|List]);
-        {FROM,{del,X}}->
-            case lists:member(X,List) of
-                true ->
-                    FROM ! {self(),deleted},
-                    state(lists:delete(X,List));
+            state([Elem|List]);
+        {FROM,{take,Elem}}->
+            case lists:member(Elem,List) of
+                true -> 
+                    FROM ! {self()!,{ok,Elem}},
+                    state(lists:delete(Elem,List));
                 false->
-                    FROM ! {self(),not_found},
+                    FROM !{self()!,not_found},
                     state(List)
-end
+            end
     end.
+        
+                    
+
         
 

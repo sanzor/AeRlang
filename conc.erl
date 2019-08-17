@@ -33,10 +33,15 @@ take(PID,Elem)->
     PID!{self(),{take,Elem}},
     receive
         {Pid,MSG}->MSG
+    after 3000 -> timeout
     end.
 
 store(PID,Elem)->
     PID!{self(),{store,Elem}},
     receive
         {Pid,MSG}->MSG
+after 3000 ->
+          timeout
     end.
+stop(PID)->
+    PID!{self(),terminate}.

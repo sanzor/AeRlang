@@ -1,6 +1,6 @@
 -module(conc).
 -compile([debug_info]).
--export([pfunc/0,state/1]).
+-export([pfunc/0,fridge/1,start/1,take/2,store/2]).
 
 pfunc()->
     receive
@@ -10,24 +10,33 @@ pfunc()->
             pfunc()
     end.
 
-state(List)->
-   receive 
-       {FROM,terminate}->FROM !{self(),terminated};
-       {FROM,{take,Elem}}->
+fridge(List)->
+    receive 
+        {FROM,{take,Elem}}->
            case lists:member(Elem,List) of
                true->
-                   FROM!{taken,Elem},
-                   state(lists:delete(Elem,List));
+                   FROM !{self(),{taken,Elem}},
+                   fridge(lists:delete(Elem,List));
                 false->
-                    FROM!{self(),not_found},
-                    state(List)
+                    FROM !{self(),{not_found}},
+                    fridge(List)
            end;
         {FROM,{store,Elem}}->
-                FROM!{self(),added},
-                state([Elem|List])
-   end.
-        
-                    
+            FROM !{self(),{stored,Elem}},
+            fridge([Elem|List]);
+        {FROM,terminate}->FROM !{self(),terminated}
+    end.
 
-        
+start(List)->
+    spawn(?MODULE,fridge,[List]).
+take(PID,Elem)->
+    PID!{self(),{take,Elem}},
+    receive
+        {Pid,MSG}->MSG
+    end.
 
+store(PID,Elem)->
+    PID!{self(),{store,Elem}},
+    receive
+        {Pid,MSG}->MSG
+    end.

@@ -45,3 +45,16 @@ after 3000 ->
     end.
 stop(PID)->
     PID!{self(),terminate}.
+
+
+
+del(DELAY)->
+    receive
+        {FROM,MSG}->FROM ! {in_time}
+    after DELAY ->
+        FROM!{timeout,msg}
+    end.
+
+
+
+     

@@ -8,7 +8,7 @@ init()->
     A.
 
 bro(Shell)->
-    Sis=spawn(?MODULE,sis,[self(),Shell)],
+    Sis=spawn(?MODULE,sis,[self(),Shell],
     broLoop([Shell,Sis]).
 
 broLoop([Shell,Sis])->

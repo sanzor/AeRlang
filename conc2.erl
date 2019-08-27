@@ -8,7 +8,8 @@ init()->
     A.
 
 bro(Shell)->
-    Sis=spawn(?MODULE,sis,[self(),Shell],
+    Sis=spawn(?MODULE,sis,[[self(),Shell]]),
+    Shell ! im_here,
     broLoop([Shell,Sis]).
 
 broLoop([Shell,Sis])->
@@ -19,10 +20,11 @@ broLoop([Shell,Sis])->
              broLoop([Shell,Sis])
     end.
 sis([Bro,Shell])->
+   
     receive
-        MSG-> Shell ! {"Thanks Shell,Just received",MSG};
         sis-> Shell ! "I am killing myself soon",
-                    exit(killed_myself)
+            exit(killed_myself);
+        MSG-> Shell ! {"Thanks Shell,Just received",MSG}
 
     end.
 

@@ -39,10 +39,9 @@ end.
 worker(Queue)->
     
     receive 
-
         die->exit({Queue,horrible});
         finish->exit({Queue,normal});
-        MSG->[{time(),MSG}|Queue]
+        MSG->worker([{time(),MSG}|Queue])
 end.
 
 

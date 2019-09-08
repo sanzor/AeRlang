@@ -1,15 +1,24 @@
 -module(mon).
 -compile_flags([debug_info]).
--export([worker/1,init/0,restarter/2]).
+-export([worker/1,init/0,restarter/2,clean/1]).
 
 % ctrl+g
 init()->
-    
+    Wk=whereis(aa),
     Pid=spawn(?MODULE,restarter,[self(),[]]),
     register(restarter,Pid),
     Pid.
 
 
+clean(List)->
+    lists:map(fun(X)->
+        Var=whereis(X),
+        if Var/=undefined ->
+            exit(Var,normal) ;
+            true -> io:format("nada")
+        end
+        end
+        ,List).
 
 restarter(Shell,Queue)->
     process_flag(trap_exit,true),
@@ -19,8 +28,10 @@ restarter(Shell,Queue)->
     
     receive
         
-        {'EXIT',Pid,{Queue,normal}}->Shell ! "From res:died peacefully, wont restart";
-        {'EXIT',Pid,{Queue,horrible}}->
+        {'EXIT',Pid,{Queue,normal}}->Shell ! {Queue,"From res: worker died peacefully, wont restart"};
+                                    
+        {'EXIT',Pid,{Queue,horrible}} ->
+                Shell ! {Queue,"Processed so far:"},
             Shell ! "will restart in 5 seconds, select fresh/stale -> 1/0",
             receive
                 1 -> 
@@ -42,7 +53,7 @@ worker(Queue)->
         die->exit({Queue,horrible});
         finish->exit({Queue,normal});
         MSG->worker([{time(),MSG}|Queue])
-end.
+    end.
 
 
 

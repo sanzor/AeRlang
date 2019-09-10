@@ -5,7 +5,7 @@
 % ctrl+g
 init()->
     Wk=whereis(aa),
-    Pid=spawn(?MODULE,restarter,[self(),[]]),
+    Pid=spawn(?MODULE,restarter,[self()]),
     register(restarter,Pid),
     Pid.
 
@@ -20,7 +20,7 @@ clean(List)->
         end
         ,List).
 
-restarter(Shell,Queue)->
+restarter(Shell)->
     process_flag(trap_exit,true),
     
     Wk=spawn_link(?MODULE,worker,[[]]),
@@ -41,9 +41,9 @@ restarter(Shell,Queue)->
                     restarter(Shell,Queue)
             after 5000 ->
               Shell ! "No response -> started with 666",
-              restarter(Shell,[666]) 
+              restarter(Shell) 
             end;
-        {MSG}->Shell ! {"Unknown message...closing",MSG}
+        MSG->Shell ! {"Unknown message...closing",MSG}
 end.
 
 

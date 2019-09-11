@@ -20,10 +20,10 @@ clean(List)->
         end
         ,List).
 
-restarter(Shell)->
+restarter(Shell,LeftOver)->
     process_flag(trap_exit,true),
     
-    Wk=spawn_link(?MODULE,worker,[[]]),
+    Wk=spawn_link(?MODULE,worker,[LeftOver]),
     register(worker,Wk),
     
     receive
@@ -41,19 +41,25 @@ restarter(Shell)->
                     restarter(Shell,Queue)
             after 5000 ->
               Shell ! "No response -> started with 666",
-              restarter(Shell) 
+              restarter(Shell,[666]) 
             end;
+
         MSG->Shell ! {"Unknown message...closing",MSG}
 end.
 
 
-worker(Queue)->
+worker(LeftOver)->
     
+    Sanitized=lists:map(fun(X)->{time(),X} end,LeftOver),
     receive 
-        die->exit({Queue,horrible});
-        finish->exit({Queue,normal});
-        MSG->worker([{time(),MSG}|Queue])
+        die->exit({Sanitized,horrible});
+        finish->exit({Sanitized,normal});
+        MSG->worker([{time(),MSG}|Sanitized])
     end.
+
+   
+
+
 
 
 

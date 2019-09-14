@@ -1,6 +1,6 @@
 -module(mon).
 -compile_flags([debug_info]).
--export([worker/1,init/0,restarter/2,clean/1,send/2]).
+-export([worker/1,init/0,restarter/2,clean/1,send/2,makeProc/0,rec2/1]).
 
 % ctrl+g
 init()->
@@ -53,8 +53,6 @@ end.
 
 
 worker(Results)->
-    
-   
     receive 
         die->exit({Results,horrible});
         finish->exit({Results,normal});
@@ -64,11 +62,18 @@ worker(Results)->
 
 rec2(Shell)->
     receive
+        aa->Shell ! branched;
         MSG->
+            Shell ! inside_outer,
             receive
-             DAT-> Shell ! MSG ! DAT
-end
-end.
+            DAT-> Shell ! inside_inner
+            end
+    end.
+
+makeProc()->
+    P=spawn(?MODULE,rec2,[self()]),
+    P.
+
 
 
 
